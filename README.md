@@ -1,6 +1,8 @@
 # portfolio
 
-In deze repo zijn 5 projecten. In de volgende talen/frameworks:
+In deze repo zitten 5 projecten.
+
+De volgende frameworks zijn gebruikt:
 * ansible
 * python - django
 * python - fastapi
