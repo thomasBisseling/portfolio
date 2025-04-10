@@ -1,0 +1,7 @@
+server:
+  ha:
+    enabled: true
+    replicas: 3
+
+metrics:
+  enabled: true

@@ -1,0 +1,47 @@
+stages:
+  - build
+  - test
+  - deploy
+
+variables:
+  VITALEEY_DOCKER_USERNAME: $CI_REGISTRY_USER
+  VITALEEY_DOCKER_PASSWORD: $CI_REGISTRY_PASSWORD
+  VITALEEY_DOCKER_IMAGE_NAME: $CI_REGISTRY_IMAGE
+
+build:
+  stage: build
+  image: registry.gitlab.com/vitaleey/docker/docker-pipeline:latest
+  services:
+      - docker:dind
+  script:
+    - vitaleey docker build --push --no-rebuild
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+  interruptible: true
+
+.build:
+  stage: deploy
+  image: registry.gitlab.com/vitaleey/docker/docker-pipeline:latest
+  services:
+    - docker:dind
+  script:
+    - vitaleey app docker tag $CI_COMMIT_SHORT_SHA $DEPLOY_VERSION
+
+build_development:
+  extends: .deploy
+  variables:
+    DEPLOY_NAME: development
+    DEPLOY_VERSION: $CI_COMMIT_SHORT_SHA
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: on_success
+
+build_production:
+    extends: .deploy
+    variables:
+        DEPLOY_NAME: production
+        DEPLOY_VERSION: $CI_COMMIT_TAG
+    rules:
+      - if: $CI_COMMIT_TAG =~ /^v[0-9]+\.[0-9]+\.[0-9]+$/
+        when: on_success

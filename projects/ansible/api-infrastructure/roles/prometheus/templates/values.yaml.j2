@@ -1,0 +1,13 @@
+alertmanager:
+  enabled: {{ prometheus_alertmanager_enabled }}
+
+server:
+  global:
+    scrape_interval: {{ prometheus_scrape_interval }}
+  resources:
+    requests:
+      memory: {{ prometheus_memory_request }}
+      cpu: {{ prometheus_cpu_request }}
+
+nodeExporter:
+  enabled: {{ prometheus_node_exporter_enabled }}

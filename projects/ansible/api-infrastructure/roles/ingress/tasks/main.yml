@@ -1,0 +1,8 @@
+---
+- name: Create ingress routes for all services
+  kubernetes.core.k8s:
+    definition: "{{ lookup('template', 'roles/ingress/templates/definition.yaml.j2') }}"
+    kubeconfig: "{{ kubeconfig }}"
+    state: present
+  register: ingress_create
+  until: ingress_create is succeeded

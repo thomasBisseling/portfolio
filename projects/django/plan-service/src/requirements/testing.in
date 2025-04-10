@@ -1,0 +1,10 @@
+flake8-debugger
+django-test-migrations
+pytest-cache
+pytest-mock
+pytest-rerunfailures
+pytest-cov
+pytest-factoryboy
+pytest
+pytest-django
+ipdb

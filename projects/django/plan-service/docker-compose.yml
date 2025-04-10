@@ -1,0 +1,90 @@
+x-api-environment: &base-api-environment
+  GUNICORN_WORKERS: ${GUNICORN_WORKERS:-1}
+  GUNICORN_THREADS: ${GUNICORN_THREADS:-1}
+
+x-api-service: &base-api-service
+  restart: unless-stopped
+  build:
+    context: .
+    target: development
+    secrets:
+      - gitlab_pip_index_url
+  depends_on:
+    - db
+    - redis
+  secrets:
+    - sentry_dsn
+    - db_password
+    - secret_key
+    - redis_password
+  env_file:
+    - .env
+  volumes:
+    - ./src:/home/userapp/src
+    - home:/home/userapp/.home
+  environment: *base-api-environment
+
+services:
+  nginx-proxy:
+    image: nginxproxy/nginx-proxy
+    ports:
+      - "80:80"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+  api:
+    <<: *base-api-service
+    environment:
+      <<: *base-api-environment
+      VIRTUAL_HOST: localhost,*.localhost
+      VIRTUAL_PORT: 8000
+    # Allow for (i)pdb to work when attached
+    stdin_open: true
+    tty: true
+  db:
+    container_name: postgres-vitaleey-plan
+    image: postgres:15-alpine
+    volumes:
+      - db:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: service-plan
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+    ports:
+      - "7432:5432"
+    secrets:
+      - db_password
+  redis:
+    image: redis:alpine
+    restart: unless-stopped
+    secrets:
+      - redis_password
+    environment:
+      REDIS_PASSWORD_FILE: /run/secrets/redis_password
+    command: >
+      sh -c 'redis-server --requirepass "$$(cat $$REDIS_PASSWORD_FILE)"'
+  mailpit: # For testing local email sending
+    image: axllent/mailpit
+    volumes:
+      - mailpit:/data
+    environment:
+      MP_DATA_FILE: /data/mailpit.db
+      MP_SMTP_BIND_ADDR: 0.0.0.0:25
+      VIRTUAL_HOST: mail.localhost
+      VIRTUAL_PORT: 8025
+
+volumes:
+  home:
+  db:
+  mailpit:
+  redis:
+
+secrets:
+  db_password:
+    file: secrets/db_password
+  gitlab_pip_index_url:
+    file: secrets/gitlab_pip_index_url
+  sentry_dsn:
+    file: secrets/sentry_dsn
+  secret_key:
+    file: secrets/secret_key
+  redis_password:
+    file: secrets/redis_password

@@ -1,0 +1,10 @@
+all:
+  hosts:
+    localhost:
+      ansible_connection: local
+      ansible_python_interpreter: env/bin/python3  # Adjust if needed
+  vars:
+      kubeconfig: "~/.kube/config"
+      cert_manager_issuer: "letsencrypt-local"
+      host: localhost
+      vault_dev_mode: true

@@ -1,0 +1,109 @@
+[project]
+name = "plan-service"
+version = "0.1.0"
+readme = "../README.md"
+
+[tool.flake8]
+max-line-length = 119
+max-complexity = 15
+exclude = [
+    "*/node_modules/*",
+    "*/migrations/*",
+    "*/fixtures.py",
+    "*/settings/*"
+]
+# When adding a flake8 error to ignore, please describe the error in a comment line.
+# List of docstring errors: http://www.pydocstyle.org/en/stable/error_codes.html
+ignore = [
+    "W503", # Line break occurred before a binary operator (old pep8)
+]
+per-file-ignores = [
+    "*/migrations/*:E501", # Ignore line length for migrations
+]
+
+
+[tool.pytest.ini_options]
+testpaths = "service"
+addopts = [
+    "--ds=service.settings.test", # This is needed because we want to override environment variable
+    "--cov=.",
+    "--cov-report=html:coverage/html",
+    "--cov-report=xml:coverage/results.xml",
+]
+filterwarnings = [
+#    "error",
+    # Suppress all RemovedInDjango51Warnings, because we're pinned on 4.2LTS.
+    "ignore::django.utils.deprecation.RemovedInDjango51Warning",
+    "ignore::django.utils.deprecation.RemovedInDjango50Warning",
+    # Suppress DeprecationWarning: datetime.datetime.utcfromtimestamp: https://github.com/dateutil/dateutil/issues/1314
+    "ignore::DeprecationWarning:dateutil",
+]
+
+
+[tool.coverage.run]
+branch = true
+omit = [
+    "*/migrations/*",
+    "*/tests/*",
+    "*/factories.py",
+    "*/formats.py",
+    "*/__init__.py",
+    "manage.py",
+    "service/celery.py",
+    "service/asgi.py",
+    "service/wsgi.py",
+    "service/urls.py",
+    "service/settings/*",
+    "*/conftest.py",
+]
+
+[tool.isort]
+profile = "black"
+known_first_party = "service"
+
+[tool.black]
+line-length = 119
+target-version = ['py312']
+extend-exclude = '''
+    /migrations|/node_modules|/static|/private|/coverage
+'''
+
+
+[tool.djlint]
+profile="django"
+blank_line_after_tag="load,extends,include,endblock"
+indent=2
+extend_exclude="htmlcov"
+# H030: Consider adding a meta description
+# H031: Consider adding meta keywords
+ignore="H030,H031"
+
+
+[tool.mypy]
+files = "service"
+exclude = [
+    ".*/migrations/.*\\.py$",
+    ".*/tests/.*\\.py$",
+    "service/settings/.*\\.py$",
+    "env/.*",
+]
+plugins = ["mypy_django_plugin.main"]
+# Enable portion of strict: https://mypy.readthedocs.io/en/stable/existing_code.html
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+strict_equality = true
+strict_concatenate = true
+check_untyped_defs = true
+no_implicit_reexport = true
+no_implicit_optional = true
+
+[tool.django-stubs]
+django_settings_module = "service.settings.test"
+
+# All modules with no typing support
+[[tool.mypy.overrides]]
+module = "storages.*"
+ignore_missing_imports = true
+
+

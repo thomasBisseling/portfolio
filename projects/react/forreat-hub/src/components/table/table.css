@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+.table__container {
+  @apply flex flex-1 flex-col gap-x-10 gap-y-2;
+}
+
+.table__inner {
+  @apply overflow-hidden rounded-xl h-auto border-gray-200 border;
+}
+
+.table__header {
+  @apply font-bold before:border-b-2 text-2xl text-black leading-tight;
+}
+
+table.table {
+  @apply table-auto w-full py-3 px-2 text-sm border-collapse;
+}
+
+table.table thead {
+  @apply text-xs font-light border-b border-gray-200;
+}
+
+table.table th {
+  @apply text-left py-2 px-4;
+}
+
+table.table td {
+  @apply py-2 px-4 text-gray-500 text-left;
+}
+
+table.table tbody tr:not(:last-child) {
+  @apply border-b border-gray-200;
+}

@@ -1,0 +1,19 @@
+services:
+  - name: prometheus-server
+    namespace: monitoring
+    domain: prometheus.{{ host }}
+    port: 80
+    tls_secret_name: prometheus-server-tls
+    ip_protected: true
+
+#  - name: traefik
+#    namespace: kube-system
+#    domain: traefik.{{ host }}
+#    port: 80
+#    ip_protected: true
+#
+#  - name: vault
+#    namespace: security
+#    domain: vault.{{ host }}
+#    port: 8200
+#    ip_protected: true

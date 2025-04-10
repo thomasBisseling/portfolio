@@ -1,0 +1,71 @@
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-production
+  namespace: monitoring
+spec:
+  acme:
+    email: admin@vitaleey.com
+    server: https://acme-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      name: letsencrypt-issuer-account-key
+    solvers:
+      - http01:
+          ingress:
+            ingressClassName: traefik
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: prd-prometheus-server-cert
+  namespace: monitoring
+spec:
+  secretName: prd-prometheus-server-cert
+  dnsNames:
+    - "prometheus.localhost"
+  issuerRef:
+    name: letsencrypt-production
+    kind: ClusterIssuer
+    group: cert-manager.io
+  duration: 2160h # 90d
+  renewBefore: 360h # 15d
+  privateKey:
+    algorithm: RSA
+    encoding: PKCS1
+    size: 2048
+  subject:
+    organizations:
+      - Vitaleey Inc.
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: https-redirectscheme
+  namespace: monitoring
+spec:
+  redirectScheme:
+    permanent: true
+    scheme: https
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: prometheus.ingressroute
+  namespace: monitoring
+spec:
+  entryPoints:
+    - web
+    - websecure
+  routes:
+    - match: Host(`prometheus.localhost`)
+      kind: Rule
+      services:
+        - name: prometheus-server
+          namespace: monitoring
+          port: 80
+      middlewares:
+        - name: https-redirectscheme
+          namespace: monitoring
+  tls:
+    secretName: prd-prometheus-server-cert

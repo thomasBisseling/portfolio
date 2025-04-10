@@ -1,0 +1,72 @@
+x-api-service: &base-api-service
+  restart: unless-stopped
+  build:
+    context: .
+    args:
+      IMAGE_TAG: 312-dev # *-dev means development, an image with *-alpine is used for production
+    target: development
+    secrets:
+      - gitlab_pip_index_url
+  depends_on:
+    - db
+    - redis
+  secrets:
+    - sentry_dsn
+    - db_password
+    - secret_key
+    - redis_password
+  environment:
+    DB_HOST: db
+    DB_NAME: plan_service
+    DB_USER: service-plan
+    DB_PASSWORD: service_plan
+  volumes:
+    - ./src:/home/userapp/src
+    - home:/home/userapp/.home
+
+services:
+  api:
+    <<: *base-api-service
+    # Allow for (i)pdb to work when attached
+    stdin_open: true
+    tty: true
+    ports:
+      - "80:8000"
+  db:
+    image: postgres:15-alpine
+    volumes:
+      - db:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: plan_service
+      POSTGRES_USER: service-plan
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+    ports:
+      - "7432:5432"
+    secrets:
+      - db_password
+  redis:
+    image: redis:alpine
+    restart: unless-stopped
+    secrets:
+      - redis_password
+    environment:
+      REDIS_PASSWORD_FILE: /run/secrets/redis_password
+    command: >
+      sh -c 'redis-server --requirepass "$$(cat $$REDIS_PASSWORD_FILE)"'
+volumes:
+  home:
+  db:
+    driver: local
+  redis:
+
+secrets:
+  db_password:
+    file: secrets/db_password
+  gitlab_pip_index_url:
+    file: secrets/gitlab_pip_index_url
+  sentry_dsn:
+    file: secrets/sentry_dsn
+  secret_key:
+    file: secrets/secret_key
+  redis_password:
+    file: secrets/redis_password

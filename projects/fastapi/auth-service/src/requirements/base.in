@@ -1,0 +1,14 @@
+fastapi
+uvicorn[standard]
+pydantic
+python-decouple
+sqlmodel
+alembic
+psycopg[binary]
+sqlalchemy[asyncio]
+sqlalchemy-utils
+requests
+colored
+argh
+passlib
+python-jose[cryptography]

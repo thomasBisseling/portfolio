@@ -1,0 +1,60 @@
+[project]
+name = "plan-service"
+version = "1.0" # We deploy git tags to k8s, leave this as is
+
+[tool.setuptools]
+py-modules = []
+
+[tool.flake8]
+max-line-length = 120
+max-complexity = 6
+exclude = [
+    "*/fixtures.py",
+    "*/settings/*",
+    "htmlcov"
+]
+# When adding a flake8 error to ignore, please describe the error in a comment line.
+# List of docstring errors: http://www.pydocstyle.org/en/stable/error_codes.html
+ignore = [
+    "W503", # Line break occurred before a binary operator (old pep8)
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = "service"
+pythonpath = "."
+env = [
+    "API_SETTINGS_MODULE=service.settings.testing"
+]
+addopts = [
+   "--cov=.",
+   "--cov-report=html",
+   "--cov-report=xml",
+   "--cov-report=term-missing"
+]
+filterwarnings = [
+    "error",
+    "ignore::ResourceWarning",
+    "ignore::DeprecationWarning",
+]
+
+[tool.coverage.run]
+branch = true
+omit = [
+    "*/tests/*",
+    "*/factories.py",
+    "service/__init__.py",
+    "service/core/*",
+    "*/migrations/*",
+    "main.py",
+    "service/settings/*",
+    "*/conftest.py",
+]
+
+[tool.isort]
+profile = "black"
+known_first_party = "service"
+
+[tool.black]
+target-version = ['py312']
+extend-exclude = "alembic|coverage"

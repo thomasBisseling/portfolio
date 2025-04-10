@@ -1,0 +1,20 @@
+---
+- name: Add Prometheus Helm repository
+  kubernetes.core.helm_repository:
+    name: prometheus
+    repo_url: https://prometheus-community.github.io/helm-charts
+    state: present
+  register: prometheus_helm_repo_add
+
+- name: Install Prometheus Helm chart
+  kubernetes.core.helm:
+    name: prometheus
+    chart_ref: prometheus/prometheus
+    release_namespace: monitoring
+    create_namespace: true
+    kubeconfig: "{{ kubeconfig }}"
+    values: "{{ lookup('template', 'roles/prometheus/templates/values.yaml.j2') | from_yaml }}"
+    state: present
+    wait: yes
+  when: not prometheus_helm_repo_add.failed
+  register: prometheus_helm_install

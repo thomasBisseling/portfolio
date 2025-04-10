@@ -1,0 +1,12 @@
+ingressRoute:
+  dashboard:
+    enabled: {{ traefik_dashboard_enabled }}
+
+replicas: {{ traefik_replicas }}
+
+accessControl:
+  ipWhiteList:
+    sourceRange:
+      {% for ip in ip_whitelist %}
+        - "{{ ip.ip_address }}" # {{ ip.name }}
+      {% endfor %}

@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+.btn {
+  @apply inline-flex items-center justify-center px-2 py-2 text-xs rounded-md cursor-pointer text-white ease-in;
+}
+
+.btn:focus {
+    @apply outline-none ring-4;
+}
+
+.btn--red {
+    @apply bg-red-500 hover:bg-red-600 focus:ring-red-300;
+}
+
+.btn--blue {
+    @apply bg-blue-500 hover:bg-blue-600 focus:ring-blue-300;
+}
+
+.btn--green {
+    @apply bg-green-500 hover:bg-green-600 focus:ring-green-300;
+}
+
+.btn--primary {
+    @apply bg-yellow-500 focus:ring-yellow-300 hover:bg-yellow-600;
+}

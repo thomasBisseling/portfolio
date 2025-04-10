@@ -1,0 +1,20 @@
+---
+- name: Add Traefik Helm repository
+  kubernetes.core.helm_repository:
+    name: traefik
+    repo_url: https://helm.traefik.io/traefik
+    state: present
+  register: traefik_helm_repo_add
+
+- name: Install Traefik Helm chart
+  kubernetes.core.helm:
+    name: traefik
+    chart_ref: traefik/traefik
+    release_namespace: kube-system
+    create_namespace: true
+    kubeconfig: "{{ kubeconfig }}"
+    values: "{{ lookup('template', 'roles/traefik/templates/values.yaml.j2') | from_yaml }}"
+    state: present
+    wait: yes
+  when: not traefik_helm_repo_add.failed
+  register: traefik_helm_install

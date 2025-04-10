@@ -1,0 +1,12 @@
+-r base.in
+-r testing.in
+
+black
+flake8
+isort
+autoflake
+coverage
+bandit
+flake8-black
+flake8-isort
+flake8-pyproject

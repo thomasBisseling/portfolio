@@ -1,0 +1,82 @@
+server:
+  replicas: 1
+  bootstrapExpect: 1
+  disruptionBudget:
+    enabled: true
+    maxUnavailable: 0
+
+# Enable and configure ACLs
+global:
+  acls:
+    manageSystemACLs: true
+    createReplicationToken: true
+
+# Configure UI settings
+ui:
+  enabled: true
+  service:
+    enabled: true
+    type: ClusterIP
+  metrics:
+    enabled: true
+    provider: "prometheus"
+
+# Configure ACL tokens
+acl:
+  enabled: true
+  defaultPolicy: deny
+  enableTokenReplication: true
+  # Enable ACL token persistence
+  enableTokenPersistence: true
+
+# Configure bootstrapping
+bootstrapACLs: true
+
+# Configure Consul Connect
+connectInject:
+  enabled: true
+  default: false
+
+# Configure service mesh
+meshGateway:
+  enabled: true
+
+# Configure DNS settings
+dns:
+  enabled: true
+  enableRedirection: true
+
+# Configure client agent settings
+client:
+  enabled: true
+  grpc: true
+
+# Configure Prometheus metrics
+metrics:
+  enabled: true
+  enableAgentMetrics: true
+
+# Configure secure communication
+tls:
+  enabled: false
+
+ingressGateways:
+  enabled: true
+  gateways:
+    - name: ingress-gateway
+      replicas: 1
+      service:
+        type: LoadBalancer
+        ports:
+          - port: 443
+            targetPort: 443
+            protocol: TCP
+
+uiIngress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: "traefik"
+  hosts:
+    - host: "consul-ui.localhost"
+      paths:
+        - path: "/"

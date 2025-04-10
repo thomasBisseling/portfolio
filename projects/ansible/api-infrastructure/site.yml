@@ -1,0 +1,43 @@
+---
+- name: Deploy security and monitor applications
+  hosts: all
+  roles:
+#    - role: prometheus
+    - role: traefik
+    - role: vault
+#    - role: cert_manager
+
+#- name: Modify /etc/hosts to resolve local domains dynamically
+#  hosts: localhost
+#  become: yes  # To make changes to /etc/hosts, we need elevated privileges
+#  become_user: root
+#  tasks:
+#    - name: Ensure entries for each service domain in /etc/hosts
+#      lineinfile:
+#        path: /etc/hosts
+#        regexp: "^127\\.0\\.0\\.1\\s+{{ service.domain }}"
+#        line: "127.0.0.1 {{ service.domain }}"
+#        state: present
+#      loop: "{{ services }}"
+#      loop_control:
+#        loop_var: service
+#
+#- name: Deploy Ingress for all services
+#  hosts: all
+#  gather_facts: false
+#  tasks:
+#    - name: Include ingress role for each service
+#      include_role:
+#        name: ingress
+#    - name: Restart Traefik pod to apply
+#      changed_when: false
+#      shell: kubectl rollout restart deployment traefik -n kube-system
+#    - name: Wait for all services to be up and running
+#      wait_for:
+#        host: "{{ service.domain }}"
+#        port: "{{ service.port }}"
+#        delay: 5
+#        timeout: 300
+#      loop: "{{ services }}"
+#      loop_control:
+#        loop_var: service

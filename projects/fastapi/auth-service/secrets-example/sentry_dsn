@@ -1,0 +1,3 @@
+Dit bestand wordt alleen gebruik bij productie images (Staging en Productie) en bevat de Sentry DSN.
+Dit is een geheime waarde die Sentry gebruikt om fouten te loggen.
+Deze waarde is geheim en mag niet gedeeld worden met derden.

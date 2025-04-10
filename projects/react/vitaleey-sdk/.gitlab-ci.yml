@@ -1,0 +1,56 @@
+stages:
+  - build-and-test
+  - release
+
+variables:
+  NPM_TOKEN: ${CI_JOB_TOKEN}
+
+default:
+  image: node:latest
+  before_script:
+    - yarn install --immutable-cache
+    - |
+      {
+        echo "@${CI_PROJECT_ROOT_NAMESPACE}:registry=${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/npm/"
+        echo "${CI_API_V4_URL#https?}/projects/${CI_PROJECT_ID}/packages/npm/:_authToken=${NPM_TOKEN}"
+      } | tee --append .npmrc
+  cache:
+    - key: ${CI_COMMIT_REF_SLUG}
+      paths:
+        - .yarn/
+    - paths:
+        - node_modules/
+
+unit_tests:
+  stage: build-and-test
+  coverage: "/All files[^|]*\\|[^|]*\\s+([\\d\\.]+)/"
+  script:
+    - yarn test:ci:unit
+  artifacts:
+    reports:
+      junit: junit.xml
+      coverage_report:
+        path: coverage/cobertura-coverage.xml
+        coverage_format: cobertura
+  only:
+    - merge_requests
+    - main
+
+build:
+  stage: build-and-test
+  script:
+    - yarn build
+  artifacts:
+    paths:
+      - dist/
+    expire_in: 10 minutes
+  only:
+    - main
+    - merge_requests
+
+release:
+  stage: release
+  script:
+    - yarn semantic-release
+  only:
+    - main

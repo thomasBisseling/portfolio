@@ -1,0 +1,16 @@
+Django<6.0.0
+drf-yasg
+django-filter
+django-modeltranslation
+django-cors-headers
+djangorestframework
+
+requests
+mypy
+pytz
+freezegun
+django-extensions
+pdbpp
+argh
+termcolor
+psycopg2-binary

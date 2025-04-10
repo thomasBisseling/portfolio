@@ -1,0 +1,63 @@
+---
+- name: Add Hashicorp Vault Helm repository
+  kubernetes.core.helm_repository:
+    name: hashicorp
+    repo_url: https://helm.releases.hashicorp.com
+  register: vault_helm_repo_add
+
+- name: Install Hashicorp Vault Helm chart
+  kubernetes.core.helm:
+    name: vault
+    chart_ref: hashicorp/vault
+    chart_version: 0.29.1
+    release_namespace: vault
+    create_namespace: true
+    kubeconfig: "{{ kubeconfig }}"
+    values: "{{ lookup('template', 'roles/vault/templates/values.yaml.j2') | from_yaml }}"
+    state: present
+    wait: yes
+  when: not vault_helm_repo_add.failed
+  register: vault_helm_install
+
+- name: Wait until Vault Pods are active
+  wait_for:
+    host: vault-internal.vault.svc.cluster.local
+    port: 8200
+    delay: 5
+    timeout: 300
+
+- name: Check if Vault is already initialized
+  command: kubectl exec -n vault vault-0 -- vault status
+  register: vault_status
+  failed_when: false
+
+- name: Init Vault
+  command: kubectl exec -n vault vault-0 -- vault operator init -key-shares=5 -key-threshold=3 -format=json
+  register: vault_init
+  when: '"Initialized: false" in vault_status.stdout'
+
+- name: Save the Unseal Key and Root Token secured
+  ansible.builtin.copy:
+    content: "{{ vault_init.stdout }}"
+    dest: "/tmp/vault-init.json"
+  register: vault_saved
+  failed_when: false
+  when: '"Initialized: false" in vault_status.stdout'
+
+- name: Load Vault unseal keys
+  command: cat /tmp/vault-init.json
+  register: vault_load
+  when: vault_saved.stdout is defined
+
+- name: Unseal Vault
+  command: kubectl exec -n vault vault-0 -- vault operator unseal {{ item }}
+  loop: "{{ vault_load.stdout | from_json | json_query('unseal_keys_b64') }}"
+  when: vault_load.stdout is defined
+
+- name: Verify if Vault is unsealed
+  command: kubectl exec -n vault vault-0 -- vault status
+  register: vault_status
+
+- name: Show Vault status
+  debug:
+    msg: "{{ vault_status.stdout }}"

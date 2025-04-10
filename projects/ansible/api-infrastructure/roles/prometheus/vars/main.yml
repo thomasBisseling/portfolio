@@ -1,0 +1,5 @@
+prometheus_alertmanager_enabled: true
+prometheus_scrape_interval: 30s
+prometheus_memory_request: 512Mi
+prometheus_cpu_request: "500m"
+prometheus_node_exporter_enabled: true

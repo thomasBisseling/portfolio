@@ -1,0 +1,1 @@
+exclude_dirs: ['*/test_*.py', "*/conftest.py", "service/settings", "*/factories.py"]

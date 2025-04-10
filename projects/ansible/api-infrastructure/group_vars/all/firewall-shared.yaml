@@ -1,0 +1,10 @@
+ip_whitelist:
+  - name: "(home)"
+    ip_address: "0.0.0.0"
+
+ssh_keys:
+  - name: "Macbook"
+    public_key:
+      <!---> public_key <!--->
+    roles:
+      - sysadmin

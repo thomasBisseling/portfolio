@@ -1,0 +1,2 @@
+traefik_replicas: 2
+traefik_dashboard_enabled: true
